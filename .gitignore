@@ -1,0 +1,23 @@
+# Secrets — NEVER commit
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.json
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
