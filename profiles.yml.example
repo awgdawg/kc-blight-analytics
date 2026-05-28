@@ -1,0 +1,27 @@
+kc_blight:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: cms-medicare-analytics
+      dataset: kc_blight_dev
+      keyfile: C:\Users\auglt\.dbt\cms-analytics-sa.json
+      location: US
+      threads: 4
+    ci:
+      type: bigquery
+      method: service-account-json
+      project: cms-medicare-analytics
+      dataset: kc_blight_ci
+      keyfile_json: "{{ env_var('GCP_SA_KEY') }}"
+      location: US
+      threads: 4
+    prod:
+      type: bigquery
+      method: service-account-json
+      project: cms-medicare-analytics
+      dataset: kc_blight_prod
+      keyfile_json: "{{ env_var('GCP_SA_KEY') }}"
+      location: US
+      threads: 4
