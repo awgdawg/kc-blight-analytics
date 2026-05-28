@@ -10,7 +10,7 @@ jobs:
   dbt-build:
     runs-on: ubuntu-latest
     env:
-      DBT_KEYFILE: ${{ runner.temp }}/gcp-key.json
+      DBT_KEYFILE: ${{ github.workspace }}/gcp-key.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
