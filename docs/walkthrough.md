@@ -182,23 +182,37 @@ one of these would have quietly corrupted a chart if the model had no tests.
 
 ## 7. The Looker Studio dashboard
 
-The board reads the six `mart_*` tables in `kc_blight_prod_marts`. Build order:
-**add a data source per mart, then drop each chart and bind its dimension + metric.**
+The board reads the `mart_*` tables in `kc_blight_prod_marts`, laid out as a
+**two-page, map-centric report** on a 1200×900 canvas. Build order: **add a data
+source per mart, then drop each chart and bind its dimension + metric.**
 
-### Dashboard build table
+A geo map can only carry *spatial* facts — so hotspots and council-district
+geography live on the map, while the *non-spatial* views (violation-type mix, a
+time trend) get their own page. A **report-level** date/district control drives
+both pages from one place.
+
+### Page 1 — overview + hotspot heatmap (the hero)
 
 | Row | Chart type | Data source (mart) | Dimension | Metric / setup |
 |---|---|---|---|---|
 | 1a | Scorecard | `mart_blight_funnel` | — | `property_count`; filter `stage_order = 1` → **Properties cited** (79,892) |
-| 1b | Scorecard | `mart_blight_funnel` | — | `pct_of_violation_properties`; filter `stage = 'Repeat violations'`, format % → **Repeat rate** (85.6%) |
-| 1c | Scorecard | `mart_blight_funnel` | — | `pct_of_violation_properties`; filter `stage = 'Dangerous building'`, format % → **% escalated** (0.4%) |
+| 1b | Scorecard | `mart_blight_funnel` | — | `pct_of_violation_properties`; filter `stage = 'Repeat violations'`, % → **Repeat rate** (85.6%) |
+| 1c | Scorecard | `mart_blight_funnel` | — | `pct_of_violation_properties`; filter `stage = 'Dangerous building'`, % → **% escalated** (0.4%) |
 | 1d | Scorecard | `mart_council_district` | — | `SUM(total_violations)` → **Total violations** (~972K) |
 | 2 left | Bar chart | `mart_blight_funnel` | `stage` (sort by `stage_order` asc) | `property_count` → the **funnel** |
 | 2 right | Time series | `mart_violations_trend` | `year` | `total_violations`; **Breakdown** = `source_system` |
-| 3 | Column chart | `mart_council_district` | `district_label` | `total_violations` (sort desc); optional 2nd metric `median_days_to_resolve` (combo) |
-| 4 left | Bar chart (horizontal) | `mart_top_violation_types` | `violation_description` | `violation_count` (sort desc, limit 20) |
-| 4 right | Time series (line) | `mart_resolution_time` | `year` | `median_days_to_resolve`; **Breakdown** = `council_district` |
-| 5 | Table or bubble map | `mart_blight_hotspots` | `street_address` (or `pin`) | `total_violations`; for a map, set geo to `latitude`/`longitude` |
+| 3 (hero) | **Google Maps → Heatmap layer** | `mart_property_points` | geo = `lat_lng` (type: Latitude,Longitude) | **weight** = `total_violations` (~79.8K points). Optional **Bubble layer** over `mart_blight_hotspots`, color = `current_stage`, for the worst offenders |
+
+### Page 2 — what & when (non-spatial)
+
+| Row | Chart type | Data source (mart) | Dimension | Metric / setup |
+|---|---|---|---|---|
+| 1 | Bar chart (horizontal) | `mart_top_violation_types` | `violation_description` | `violation_count` (sort desc, limit 20) |
+| 2 | Time series (line) | `mart_resolution_time` | `year` | `median_days_to_resolve`; **Breakdown** = `council_district` (this is where the 134-vs-260-day district gap shows) |
+
+> Note: Looker Studio has no built-in KC council-district boundaries, so you
+> **can't** shade district polygons (a true choropleth). District shows up as the
+> heatmap's geography and as the breakdown on the page-2 resolution line.
 
 ### Theme
 Match the portfolio: page background `#0a0a0b`, accent `#f5a623` (amber), secondary

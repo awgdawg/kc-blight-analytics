@@ -13,3 +13,9 @@ models:
     columns:
       - name: violation_code
         tests: [not_null]
+  - name: mart_property_points
+    columns:
+      - name: pin
+        tests: [unique, not_null]
+      - name: lat_lng
+        tests: [not_null]
