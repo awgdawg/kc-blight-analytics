@@ -46,11 +46,25 @@ def sanitize_key(key: str) -> str:
 
 
 def clean_record(record: dict) -> dict:
-    """Sanitize keys and JSON-encode nested values (Socrata point/location)."""
+    """Sanitize keys and coerce every value to a string (or None).
+
+    The raw layer is intentionally all-STRING. KCMO datasets have dirty,
+    mixed-type columns (e.g. `inspection_area` is usually numeric but is
+    sometimes a street name), which makes BigQuery autodetect guess a numeric
+    type and then fail on the first text value. Coercing everything to STRING
+    lets autodetect pick STRING for every column; dbt staging casts to proper
+    types downstream. Nested values (Socrata point/location structs) are
+    JSON-encoded so staging can JSON_EXTRACT lat/lng from them.
+    """
     cleaned = {}
     for key, value in record.items():
         k = sanitize_key(key)
-        cleaned[k] = json.dumps(value) if isinstance(value, (dict, list)) else value
+        if value is None:
+            cleaned[k] = None
+        elif isinstance(value, (dict, list)):
+            cleaned[k] = json.dumps(value)
+        else:
+            cleaned[k] = str(value)
     return cleaned
 
 
