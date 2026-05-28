@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: dim_property
+    columns:
+      - name: property_sk
+        tests: [unique, not_null]
+  - name: dim_council_district
+    columns:
+      - name: council_district_sk
+        tests: [unique, not_null]
+  - name: dim_violation_type
+    columns:
+      - name: violation_type_sk
+        tests: [unique, not_null]
+  - name: dim_date
+    columns:
+      - name: date_sk
+        tests: [unique, not_null]
+
+  - name: fact_violation
+    columns:
+      - name: violation_pk
+        tests: [unique, not_null]
+      - name: property_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_property')
+              field: property_sk
+      - name: violation_type_sk
+        tests:
+          - relationships:
+              to: ref('dim_violation_type')
+              field: violation_type_sk
+      - name: council_district_sk
+        tests:
+          - relationships:
+              to: ref('dim_council_district')
+              field: council_district_sk
+      - name: date_sk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_sk
+
+  - name: fact_property_lifecycle
+    columns:
+      - name: property_sk
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('dim_property')
+              field: property_sk
+      - name: council_district_sk
+        tests:
+          - relationships:
+              to: ref('dim_council_district')
+              field: council_district_sk
+      - name: current_stage
+        tests:
+          - accepted_values:
+              values: ['single_violation', 'repeat_violations', 'dangerous_building', 'demolition']
