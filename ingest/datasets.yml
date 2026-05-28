@@ -1,0 +1,10 @@
+datasets:
+  - id: nhtf-e75a
+    table: historical_violations
+    mode: frozen
+  - id: vq3e-m9ge
+    table: npd_violations
+    mode: live
+  - id: ax3m-jhxx
+    table: dangerous_buildings
+    mode: live
