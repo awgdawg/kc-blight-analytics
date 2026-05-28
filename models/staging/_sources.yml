@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: kc_blight_raw
+    database: cms-medicare-analytics
+    schema: kc_blight_raw
+    tables:
+      - name: npd_violations
+      - name: historical_violations
+      - name: dangerous_buildings

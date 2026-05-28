@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: stg_violations__current
+    columns:
+      - name: violation_id
+        tests: [not_null]
+      - name: source_system
+        tests:
+          - accepted_values:
+              values: ['energov']
+
+  - name: stg_violations__historical
+    columns:
+      - name: violation_id
+        tests: [not_null]
+      - name: source_system
+        tests:
+          - accepted_values:
+              values: ['historical']
+
+  - name: stg_dangerous_buildings
+    columns:
+      - name: pin
+        tests: [not_null, unique]
