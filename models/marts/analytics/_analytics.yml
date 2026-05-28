@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: mart_blight_funnel
+    columns:
+      - name: stage_order
+        tests: [unique, not_null]
+  - name: mart_council_district
+    columns:
+      - name: council_district
+        tests: [not_null]
+  - name: mart_top_violation_types
+    columns:
+      - name: violation_code
+        tests: [not_null]
