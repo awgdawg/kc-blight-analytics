@@ -231,10 +231,17 @@ district), because Looker aggregates the raw rows live.
 | Funnel (cumulative) | — (4 metrics) | `COUNT_DISTINCT(pin)` · `COUNT_DISTINCT(IF(total_violations>=2,pin,NULL))` · `COUNT_DISTINCT(IF(ever_dangerous_building,pin,NULL))` · `COUNT_DISTINCT(IF(current_stage='demolition',pin,NULL))` |
 | KPI · properties | — | `COUNT DISTINCT pin` |
 | KPI · % escalated | — | calc: `COUNT_DISTINCT(IF(ever_dangerous_building, pin, NULL)) / COUNT_DISTINCT(pin)` |
+| KPI · total violations | — | record `COUNT` (one row = one violation) |
 | Trend | `year` | `COUNT` (one record = one violation) |
 | Top types | `violation_description` | `COUNT` |
 | Resolution | `year` | `MEDIAN(days_open)` (computed live) |
-| Heatmap | `lat_lng` | `COUNT` (or `total_violations`) |
+| Heatmap | `lat_lng` | record `COUNT` (violation density) or `COUNT_DISTINCT(pin)` |
+
+**Caution:** `total_violations` is a *property* attribute denormalized onto every
+violation row — never `SUM` it on this table (that multiplies each property's
+count by its number of rows). For total violations use record `COUNT`;
+`total_violations` is only meaningful per-property (e.g. sorting hotspots, or as
+the weight on the property-grain `mart_property_points`).
 
 For the funnel, a bar chart with **no dimension** and those four cumulative
 metrics reproduces 79,892 → 68,384 → 318 → 21. (Grouping by `current_stage`
