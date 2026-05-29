@@ -19,6 +19,7 @@ SELECT
 
     -- violation type
     vt.violation_code,
+    vt.short_label,
     vt.chapter,
     vt.violation_description,
 

@@ -13,6 +13,7 @@ WITH counts AS (
 grand AS (SELECT SUM(violation_count) AS grand_total FROM counts)
 SELECT
     t.violation_code,
+    t.short_label,
     t.chapter,
     t.violation_description,
     c.violation_count,

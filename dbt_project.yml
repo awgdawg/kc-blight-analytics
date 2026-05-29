@@ -33,5 +33,9 @@ models:
         +materialized: table
         +schema: marts
 
+seeds:
+  kc_blight:
+    +schema: staging
+
 vars:
   raw_dataset: 'kc_blight_raw'

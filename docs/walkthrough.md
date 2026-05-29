@@ -178,6 +178,16 @@ because a **dbt test failed** — which is the whole point of having tests.
 The lesson: **tests turn silent data problems into loud build failures.** Every
 one of these would have quietly corrupted a chart if the model had no tests.
 
+**Readable chart labels via a seed.** The ordinance descriptions are unusable as
+chart labels ("Did cause or permit rank weeds or unattended growth to stand upon
+premises..."). A **seed** — `seeds/violation_labels.csv`, a hand-curated
+`violation_code → short_label` lookup — is left-joined in `dim_violation_type`,
+producing a `short_label` column (`COALESCE(seed.short_label, violation_code)`, so
+unmapped codes fall back to the code). A seed is dbt's idiomatic way to inject a
+small curated lookup: it's version-controlled, editable as a CSV without touching
+SQL, and `dbt build`/`dbt seed` loads it automatically (so CI picks it up). The
+charts then use `short_label` ("Animal feces", "Weeds / overgrowth", ...).
+
 ---
 
 ## 7. The Looker Studio dashboard
@@ -207,7 +217,7 @@ both pages from one place.
 
 | Row | Chart type | Data source (mart) | Dimension | Metric / setup |
 |---|---|---|---|---|
-| 1 | Bar chart (horizontal) | `mart_top_violation_types` | `violation_description` | `violation_count` (sort desc, limit 20) |
+| 1 | Bar chart (horizontal) | `mart_top_violation_types` | `short_label` | `violation_count` (sort desc, limit 20). `short_label` = 2-3 word names (from the `violation_labels` seed); use it instead of the unreadable full ordinance text |
 | 2 | Time series (line) | `mart_resolution_time` | `year` | `median_days_to_resolve`; **Breakdown** = `council_district` (this is where the 134-vs-260-day district gap shows) |
 
 > Note: Looker Studio has no built-in KC council-district boundaries, so you
@@ -233,7 +243,7 @@ district), because Looker aggregates the raw rows live.
 | KPI · % escalated | — | calc: `COUNT_DISTINCT(IF(ever_dangerous_building, pin, NULL)) / COUNT_DISTINCT(pin)` |
 | KPI · total violations | — | record `COUNT` (one row = one violation) |
 | Trend | `year` | `COUNT` (one record = one violation) |
-| Top types | `violation_description` | `COUNT` |
+| Top types | `short_label` | `COUNT` |
 | Resolution | `year` | `MEDIAN(days_open)` (computed live) |
 | Heatmap | `lat_lng` | record `COUNT` (violation density) or `COUNT_DISTINCT(pin)` |
 

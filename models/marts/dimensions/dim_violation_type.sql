@@ -25,6 +25,11 @@ picked AS (
 )
 
 SELECT
-    {{ dbt_utils.generate_surrogate_key(['violation_code']) }} AS violation_type_sk,
-    violation_code, chapter, violation_description
-FROM picked
+    {{ dbt_utils.generate_surrogate_key(['p.violation_code']) }} AS violation_type_sk,
+    p.violation_code,
+    p.chapter,
+    p.violation_description,
+    -- short 2-3 word label for charts; falls back to the raw code if unmapped
+    COALESCE(lbl.short_label, p.violation_code) AS short_label
+FROM picked p
+LEFT JOIN {{ ref('violation_labels') }} lbl ON p.violation_code = lbl.violation_code
