@@ -214,6 +214,33 @@ both pages from one place.
 > **can't** shade district polygons (a true choropleth). District shows up as the
 > heatmap's geography and as the breakdown on the page-2 resolution line.
 
+### Single council-district filter for the whole board (`mart_dashboard`)
+
+A Looker filter control only filters charts that use **its own data source** — so
+to make one council-district chip reslice *every* visual, every chart must read
+from **one shared source**. `mart_dashboard` is that source: one wide,
+denormalized row per violation (~972K) carrying both the violation facts and the
+property's lifecycle attributes (`current_stage`, `total_violations`, `lat_lng`,
+`council_district`, …). Point every chart at it, add a single **report-level**
+`council_district` control, and the whole board reslices together — with
+percentages and medians computed *after* the filter (so they're correct per
+district), because Looker aggregates the raw rows live.
+
+| Visual | Dimension | Metric on `mart_dashboard` |
+|---|---|---|
+| Funnel | `current_stage` | `COUNT DISTINCT pin` |
+| KPI · properties | — | `COUNT DISTINCT pin` |
+| KPI · % escalated | — | calc: `COUNT_DISTINCT(IF(ever_dangerous_building, pin, NULL)) / COUNT_DISTINCT(pin)` |
+| Trend | `year` | `COUNT` (one record = one violation) |
+| Top types | `violation_description` | `COUNT` |
+| Resolution | `year` | `MEDIAN(days_open)` (computed live) |
+| Heatmap | `lat_lng` | `COUNT` (or `total_violations`) |
+
+Trade-off: it's the BI "one big table" pattern — denormalized and ~972K rows, but
+BigQuery/Looker aggregate it fine, and it's what makes a single global filter
+possible. The narrow per-question marts still exist for anyone who wants a
+pre-aggregated source.
+
 ### Theme
 Match the portfolio: page background `#0a0a0b`, accent `#f5a623` (amber), secondary
 `#4ec9b0` (teal), font **IBM Plex Sans**. Then **Share → "Anyone with the link can

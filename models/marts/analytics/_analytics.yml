@@ -19,3 +19,9 @@ models:
         tests: [unique, not_null]
       - name: lat_lng
         tests: [not_null]
+  - name: mart_dashboard
+    columns:
+      - name: violation_pk
+        tests: [unique, not_null]   # proves the wide joins didn't fan out
+      - name: council_district
+        tests: [not_null]
