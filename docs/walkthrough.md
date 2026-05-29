@@ -228,13 +228,18 @@ district), because Looker aggregates the raw rows live.
 
 | Visual | Dimension | Metric on `mart_dashboard` |
 |---|---|---|
-| Funnel | `current_stage` | `COUNT DISTINCT pin` |
+| Funnel (cumulative) | — (4 metrics) | `COUNT_DISTINCT(pin)` · `COUNT_DISTINCT(IF(total_violations>=2,pin,NULL))` · `COUNT_DISTINCT(IF(ever_dangerous_building,pin,NULL))` · `COUNT_DISTINCT(IF(current_stage='demolition',pin,NULL))` |
 | KPI · properties | — | `COUNT DISTINCT pin` |
 | KPI · % escalated | — | calc: `COUNT_DISTINCT(IF(ever_dangerous_building, pin, NULL)) / COUNT_DISTINCT(pin)` |
 | Trend | `year` | `COUNT` (one record = one violation) |
 | Top types | `violation_description` | `COUNT` |
 | Resolution | `year` | `MEDIAN(days_open)` (computed live) |
 | Heatmap | `lat_lng` | `COUNT` (or `total_violations`) |
+
+For the funnel, a bar chart with **no dimension** and those four cumulative
+metrics reproduces 79,892 → 68,384 → 318 → 21. (Grouping by `current_stage`
+instead gives a *mutually-exclusive* stage distribution — a different, also-valid
+view, but not the cumulative funnel.)
 
 Trade-off: it's the BI "one big table" pattern — denormalized and ~972K rows, but
 BigQuery/Looker aggregate it fine, and it's what makes a single global filter
